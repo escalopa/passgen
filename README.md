@@ -55,14 +55,6 @@ Generate a password with custom characters and output in table format:
 passgen --custom-chars "abcdef123$%" --output json
 ```
 
-### Command Help
-
-You can get help for the commands by using the `--help` flag:
-
-```bash
-task help
-```
-
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull
