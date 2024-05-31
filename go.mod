@@ -5,6 +5,7 @@ go 1.22.0
 require (
 	github.com/spf13/cobra v1.8.0
 	golang.org/x/crypto v0.23.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (

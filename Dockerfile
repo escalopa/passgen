@@ -1,5 +1,5 @@
 # Build Stage
-FROM golang:alpine:3.20 AS builder
+FROM golang:alpine3.20 AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -14,13 +14,13 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN go build -o bin/passwordgen
+RUN go build -o bin/passgen
 
 # Final Stage
 FROM alpine:3.20.0 AS final
 
 # Copy the built executable from the build stage
-COPY --from=builder /app/bin/passwordgen /usr/local/bin/passwordgen
+COPY --from=builder /app/bin/passgen /usr/local/bin/passgen
 
 # Specify the entrypoint for the Docker container
-ENTRYPOINT ["/usr/local/bin/passwordgen"]
+ENTRYPOINT ["/usr/local/bin/passgen"]
