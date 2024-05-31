@@ -1,0 +1,68 @@
+version: '3'
+
+tasks:
+  install:
+    desc: "Install dependencies"
+    cmds:
+      - go mod tidy
+
+  build:
+    desc: "Build the CLI tool"
+    cmds:
+      - mkdir -p bin
+      - go build -o bin/passgen
+
+  run:
+    desc: "Run the CLI tool with default options"
+    cmds:
+      - bin/passgen generate
+
+  run-with-args:
+    desc: "Run the CLI tool with custom options"
+    cmds:
+      - bin/passgen generate --length {{length}} --use-signs {{useSigns}} --hash-times {{hashTimes}}
+    vars:
+      length:
+        default: 12
+        description: "Length of the password"
+      useSigns:
+        default: false
+        description: "Include special characters in the password"
+      hashTimes:
+        default: 1
+        description: "Number of times to hash the password with Argon2"
+
+  test:
+    desc: "Run unit tests"
+    cmds:
+      - go test ./...
+
+  docker-build:
+    desc: "Build the Docker image"
+    cmds:
+      - docker build -t passwordgen:latest .
+
+  docker-run:
+    desc: "Run the CLI tool in a Docker container"
+    cmds:
+      - docker run --rm passwordgen:latest generate --length {{length}} --use-signs {{useSigns}} --hash-times {{hashTimes}}
+    vars:
+      length:
+        default: 12
+        description: "Length of the password"
+      useSigns:
+        default: false
+        description: "Include special characters in the password"
+      hashTimes:
+        default: 1
+        description: "Number of times to hash the password with Argon2"
+
+  clean:
+    desc: "Clean up build files"
+    cmds:
+      - rm -rf bin
+
+  help:
+    desc: "Show help for Taskfile commands"
+    cmds:
+      - task --list
