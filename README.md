@@ -9,14 +9,14 @@ PassGen: A CLI tool to generate secure passwords with specified options, includi
 You can install the tool using Go:
 
 ```bash
-go install github.com/escalopa/passgen@latest
+go install github.com/escalopa/passgen@v0.0.1
 passgen --help
 ```
 
 ### Using Docker
 
 ```bash
-docker pull dekuyo/passgen:latest
+docker pull dekuyo/passgen:v0.0.1
 docker run --rm dekuyo/passgen:latest --help
 ```
 
