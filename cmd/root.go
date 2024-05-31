@@ -1,10 +1,18 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 )
+
+func init() {
+	err := loadConfig()
+	if err != nil {
+		fmt.Printf("load config: %v\n", err)
+	}
+}
 
 var rootCmd = &cobra.Command{
 	Use:   "passgen",
