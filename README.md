@@ -17,7 +17,7 @@ passgen --help
 
 ```bash
 docker pull dekuyo/passgen:v0.0.1
-docker run --rm dekuyo/passgen:latest --help
+docker run --rm dekuyo/passgen:v0.0.1 --help
 ```
 
 ## Usage
