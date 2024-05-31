@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  VERSION: latest
+  VERSION: v0.0.1
 
 tasks:
   install:

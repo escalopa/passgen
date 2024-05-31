@@ -1,0 +1,72 @@
+# .goreleaser.yml
+
+# Release settings
+release:
+  github:
+    owner: escalopa
+    name: passgen
+
+# Build settings
+builds:
+  - main: ./main.go
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w
+    env:
+      - CGO_ENABLED=0
+
+# Archive settings
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - LICENSE
+      - README.md
+
+# Brew formula settings (if you want to distribute via Homebrew)
+# brews:
+#   - name: passgen
+#     tap:
+#       owner: escalopa
+#       name: homebrew-tap
+#     commit_author:
+#       name: goreleaserbot
+#       email: goreleaser@carlosbecker.com
+#     description: A CLI tool for generating passwords
+#     homepage: "https://github.com/escalopa/passgen"
+#     dependencies:
+#       - name: go
+#     install: |
+#       bin.install "passgen"
+#     test: |
+#       system "#{bin}/passgen --version"
+#     plist: |
+#       <?xml version="1.0" encoding="UTF-8"?>
+#       <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+#       <plist version="1.0">
+#       <dict>
+#         <key>Label</key>
+#         <string>homebrew.mxcl.passgen</string>
+#         <key>ProgramArguments</key>
+#         <array>
+#           <string>/usr/local/opt/passgen/bin/passgen</string>
+#         </array>
+#         <key>RunAtLoad</key>
+#         <true/>
+#         <key>KeepAlive</key>
+#         <true/>
+#       </dict>
+#      </plist>
+
+# Changelog settings
+changelog:
+  sort: "asc"
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
