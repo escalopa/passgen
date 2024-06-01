@@ -23,7 +23,7 @@ tasks:
   test:
     desc: "Run unit tests"
     cmds:
-      - go test ./...
+      - go test ./... -v -cover
 
   docker-build:
     desc: "Build the Docker image"
