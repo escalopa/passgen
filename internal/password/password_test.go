@@ -16,25 +16,21 @@ func TestProviderGenerate(t *testing.T) {
 	const (
 		length     = 12
 		iterations = 10
-		count      = 10
 	)
 
 	// Generate a password
-	passwords, err := p.Generate(length, false, "", iterations, count)
+	pass, err := p.Generate(length, false, "", iterations)
 
 	require.NoError(t, err)
-	require.Len(t, passwords, count)
 
 	// Verify the password length & hash
-	for _, pass := range passwords {
-		require.Len(t, pass.Original, length)
-		require.NotEmpty(t, pass.Hashed)
-		require.NotEmpty(t, pass.Salt)
+	require.Len(t, pass.Original, length)
+	require.NotEmpty(t, pass.Hashed)
+	require.NotEmpty(t, pass.Salt)
 
-		// Verify the password hash
-		hash := hashPasswordWithSalt(pass.Original, pass.Salt, iterations)
-		require.Equal(t, hash, pass.Hashed)
-	}
+	// Verify the password hash
+	hash := hashPasswordWithSalt(pass.Original, pass.Salt, iterations)
+	require.Equal(t, hash, pass.Hashed)
 }
 
 func TestHashPassword(t *testing.T) {

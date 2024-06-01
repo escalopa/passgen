@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strconv"
 
 	"github.com/escalopa/passgen/internal/domain"
 	"github.com/olekukonko/tablewriter"
@@ -16,22 +15,26 @@ func NewProvider() *Provider {
 	return &Provider{}
 }
 
-func (p *Provider) Print(passwords []domain.Password, outputFormat string) error {
+func (p *Provider) Print(password *domain.Password, outputFormat string) error {
+	if password == nil {
+		return domain.ErrPasswordNil
+	}
+
 	switch outputFormat {
 	case "json":
-		return p.printJSON(passwords)
+		return p.printJSON(password)
 	case "table":
-		return p.printTable(passwords)
+		return p.printTable(password)
 	case "raw":
-		return p.printRaw(passwords)
+		return p.printPlain(password)
 	default:
 		return fmt.Errorf("unknown output format: %s", outputFormat)
 	}
 }
 
 // printJSON prints the passwords in a JSON format.
-func (p *Provider) printJSON(passwords []domain.Password) error {
-	data, err := json.MarshalIndent(passwords, "", "    ")
+func (p *Provider) printJSON(password *domain.Password) error {
+	data, err := json.MarshalIndent(password, "", "    ")
 	if err != nil {
 		return err
 	}
@@ -41,21 +44,16 @@ func (p *Provider) printJSON(passwords []domain.Password) error {
 }
 
 // printTable prints the passwords in a table format.
-func (p *Provider) printTable(passwords []domain.Password) error {
+func (p *Provider) printTable(password *domain.Password) error {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Index", "Password", "Hashed", "Salt"})
-	for i, p := range passwords {
-		idx := strconv.Itoa(i + 1)
-		table.Append([]string{idx, p.Original, p.Hashed, p.Salt})
-	}
+	table.SetHeader([]string{"Password", "Hashed", "Salt"})
+	table.Append([]string{password.Original, password.Hashed, password.Salt})
 	table.Render()
 	return nil
 }
 
-// printRaw prints the passwords in a raw format.
-func (p *Provider) printRaw(passwords []domain.Password) error {
-	for _, pwd := range passwords {
-		fmt.Println(pwd)
-	}
+// printPlain prints the passwords in a raw format.
+func (p *Provider) printPlain(password *domain.Password) error {
+	fmt.Println(password.Hashed)
 	return nil
 }

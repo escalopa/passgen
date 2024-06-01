@@ -26,32 +26,26 @@ func (p *Provider) Generate(
 	useSpecialChars bool,
 	customChars string,
 	iterations int,
-	count int,
-) ([]domain.Password, error) {
-	passwords := make([]domain.Password, count)
+) (*domain.Password, error) {
 	letters := getChars(useSpecialChars, customChars)
 
-	for i := 0; i < count; i++ {
-		// Generate password
-		password, err := generatePassword(length, letters)
-		if err != nil {
-			return nil, fmt.Errorf("generate password: %v", err)
-		}
-
-		// Hash password
-		hash, salt, err := hashPassword(password, iterations)
-		if err != nil {
-			return nil, fmt.Errorf("hash password: %v", err)
-		}
-
-		passwords[i] = domain.Password{
-			Original: password,
-			Hashed:   hash,
-			Salt:     salt,
-		}
+	// Generate password
+	password, err := generatePassword(length, letters)
+	if err != nil {
+		return nil, fmt.Errorf("generate password: %v", err)
 	}
 
-	return passwords, nil
+	// Hash password
+	hash, salt, err := hashPassword(password, iterations)
+	if err != nil {
+		return nil, fmt.Errorf("hash password: %v", err)
+	}
+
+	return &domain.Password{
+		Original: password,
+		Hashed:   hash,
+		Salt:     salt,
+	}, nil
 }
 
 // generatePassword generates a random password using the letters provided
