@@ -10,27 +10,15 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-const (
-	defaultChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	specialChars = "!@#$%^&*()-_=+[]{}|;:,.<>?/~"
-)
-
 type Provider struct{}
 
 func NewProvider() *Provider {
 	return &Provider{}
 }
 
-func (p *Provider) Generate(
-	length int,
-	useSpecialChars bool,
-	customChars string,
-	iterations int,
-) (*domain.Password, error) {
-	letters := getChars(useSpecialChars, customChars)
-
+func (p *Provider) Generate(length int, iterations int, characters string) (*domain.Password, error) {
 	// Generate password
-	password, err := generatePassword(length, letters)
+	password, err := generatePassword(length, characters)
 	if err != nil {
 		return nil, fmt.Errorf("generate password: %v", err)
 	}
@@ -91,19 +79,4 @@ func hashPasswordWithSalt(password string, salt string, times int) string {
 	}
 
 	return hashedPassword
-}
-
-// getChars returns the characters to use for the password generation.
-// If customChars is provided, it will be used instead of the default
-// characters. If useSpecialChars is true, the special characters will
-// be added to the default characters. Otherwise, only the default
-// characters will be used.
-func getChars(useSpecialChars bool, customChars string) string {
-	if customChars != "" {
-		return customChars
-	}
-	if useSpecialChars {
-		return defaultChars + specialChars
-	}
-	return defaultChars
 }

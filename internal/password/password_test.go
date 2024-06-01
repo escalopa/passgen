@@ -16,10 +16,11 @@ func TestProviderGenerate(t *testing.T) {
 	const (
 		length     = 12
 		iterations = 10
+		characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	)
 
 	// Generate a password
-	pass, err := p.Generate(length, false, "", iterations)
+	pass, err := p.Generate(length, iterations, characters)
 
 	require.NoError(t, err)
 

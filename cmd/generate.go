@@ -1,57 +1,40 @@
 package cmd
 
 import (
-	"crypto/rand"
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
-	"math/big"
 
+	"github.com/escalopa/passgen/internal/config"
+	"github.com/escalopa/passgen/internal/password"
+	"github.com/escalopa/passgen/internal/printer"
 	"github.com/spf13/cobra"
-	"golang.org/x/crypto/argon2"
+	"github.com/spf13/viper"
 )
 
 var (
-	length       int
-	useSigns     bool
-	hashTimes    int
-	numPasswords int
-	customChars  string
-	outputFormat string
+	passProvider  = password.NewProvider()
+	printProvider = printer.NewProvider()
 )
-
-// Password struct to represent a generated password
-type Password struct {
-	Original string `json:"original"`
-	Hashed   string `json:"hashed"`
-	Salt     string `json:"salt"`
-}
 
 var generateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "Generate password(s)",
 	Long:  `Generate password(s) with the specified length and options.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		passwords := make([]Password, numPasswords)
-		for i := 0; i < numPasswords; i++ {
-			password, err := generatePassword()
-			if err != nil {
-				return fmt.Errorf("generate password: %v", err)
-			}
+		cfg := config.Get()
 
-			hashedPassword, salt, err := hashPasswordMultipleTimes(password, hashTimes)
-			if err != nil {
-				return fmt.Errorf("hash password: %v", err)
-			}
+		// Used for debugging
+		// fmt.Printf("%+v\n", cfg)
 
-			passwords[i] = Password{
-				Original: password,
-				Hashed:   hashedPassword,
-				Salt:     salt,
-			}
+		passwords, err := passProvider.Generate(
+			cfg.Generate.Length,
+			cfg.Generate.Iterations,
+			cfg.Generate.Characters,
+		)
+		if err != nil {
+			return err
 		}
 
-		err := printOutput(passwords)
+		err = printProvider.Print(passwords, cfg.Generate.Clipboard)
 		if err != nil {
 			return fmt.Errorf("print output: %v", err)
 		}
@@ -63,75 +46,18 @@ var generateCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(generateCmd)
 
-	generateCmd.Flags().IntVarP(&length, "length", "l", defaultConfig.Length, "Length of the password")
-	generateCmd.Flags().BoolVarP(&useSigns, "use-signs", "s", defaultConfig.UseSigns, "Include special characters in the password")
-	generateCmd.Flags().IntVarP(&hashTimes, "hash-times", "t", defaultConfig.HashTimes, "Number of times to hash the password with Argon2")
-	generateCmd.Flags().IntVarP(&numPasswords, "num-passwords", "n", defaultConfig.NumPasswords, "Number of passwords to generate")
-	generateCmd.Flags().StringVarP(&customChars, "custom-chars", "c", defaultConfig.CustomChars, "Custom characters to use for password generation")
-	generateCmd.Flags().StringVarP(&outputFormat, "output", "o", defaultConfig.OutputFormat, "Output format (json, table, raw)")
+	generateCmd.Flags().IntP("length", "l", 12, "Length of the password")
+	generateCmd.Flags().IntP("iterations", "i", 1, "Number of times to hash the password")
+	generateCmd.Flags().StringP("characters", "c", "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", "Characters to use for the password")
+	generateCmd.Flags().BoolP("clipboard", "b", false, "Copy the password to the clipboard")
 
-}
+	viper.BindPFlag("generate.length", generateCmd.Flags().Lookup("length"))
+	viper.BindPFlag("generate.iterations", generateCmd.Flags().Lookup("iterations"))
+	viper.BindPFlag("generate.characters", generateCmd.Flags().Lookup("characters"))
+	viper.BindPFlag("generate.clipboard", generateCmd.Flags().Lookup("clipboard"))
 
-func generatePassword() (string, error) {
-	letters := getChars()
-
-	password := make([]byte, length)
-	for i := range password {
-		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(letters))))
-		if err != nil {
-			return "", err
-		}
-		password[i] = letters[num.Int64()]
-	}
-
-	return string(password), nil
-}
-
-func hashPasswordMultipleTimes(password string, times int) (string, string, error) {
-	salt := make([]byte, 16)
-	_, err := rand.Read(salt)
-	if err != nil {
-		return "", "", fmt.Errorf("generate salt: %v", err)
-	}
-
-	hashedPassword := password
-	for i := 0; i < times; i++ {
-		hash := argon2.IDKey([]byte(hashedPassword), salt, 1, 64*1024, 4, 32)
-		hashedPassword = base64.RawStdEncoding.EncodeToString(hash)
-	}
-
-	return hashedPassword, base64.RawStdEncoding.EncodeToString(salt), nil
-}
-
-func getChars() string {
-	letters := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	if useSigns {
-		letters += "!@#$%^&*()-_=+[]{}|;:,.<>?/~"
-	}
-
-	if customChars != "" {
-		letters += customChars
-	}
-
-	return letters
-}
-
-func printOutput(passwords []Password) error {
-	switch outputFormat {
-	case "json":
-		jsonOutput, err := json.MarshalIndent(passwords, "", "  ")
-		if err != nil {
-			return fmt.Errorf("marshal JSON output: %v", err)
-		}
-		fmt.Println(string(jsonOutput))
-	case "table":
-		// TODO: Implement table output formatting
-		fmt.Println("Table output is not yet implemented")
-	case "raw":
-		// TODO: Implement raw output formatting
-		fmt.Println("Raw output is not yet implemented")
-	default:
-		return fmt.Errorf("unsupported output format: %s", outputFormat)
-	}
-	return nil
+	viper.BindEnv("generate.length", "PASSGEN_GENERATE_LENGTH")
+	viper.BindEnv("generate.iterations", "PASSGEN_GENERATE_ITERATIONS")
+	viper.BindEnv("generate.characters", "PASSGEN_GENERATE_CHARACTERS")
+	viper.BindEnv("generate.clipboard", "PASSGEN_GENERATE_CLIPBOARD")
 }
