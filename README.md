@@ -9,51 +9,45 @@ PassGen: A CLI tool to generate secure passwords with specified options, includi
 You can install the tool using Go:
 
 ```bash
-go install github.com/escalopa/passgen@v0.0.1
-passgen --help
+go install github.com/escalopa/passgen@v0.0.2
+passgen generate -l 32
 ```
 
 ### Using Docker
 
 ```bash
-docker pull dekuyo/passgen:v0.0.1
-docker run --rm dekuyo/passgen:v0.0.1 --help
+docker pull dekuyo/passgen:v0.0.2
+docker run --rm dekuyo/passgen:v0.0.2 generate -l 32
 ```
 
-## Usage
+## Configuration
 
-### Generating a Password
+The application uses a configuration file named `.passgen` in one of the following formats: `.toml`, `.json`, `.yaml`, `.yml`.
 
-You can generate passwords using the `generate` command. The command takes various parameters:
+Here are the available configuration options:
 
-| Flag            | Shorthand | Description                                                  | Default Value |
-|-----------------|-----------|--------------------------------------------------------------|---------------|
-| `--length`      | `-l`      | Length of the password                                       | 12            |
-| `--use-signs`   | `-s`      | Include special characters in the password                  | false         |
-| `--hash-times`  | `-t`      | Number of times to hash the password with Argon2            | 1             |
-| `--num-passwords` | `-n`    | Number of passwords to generate                             | 1             |
-| `--output`      | `-o`      | Output format (json, table, raw)                            | json          |
-| `--custom-chars`| `-c`      | Custom characters to use for password generation            | ""            |
+| Option      | Description                                           | Type   |
+|-------------|-------------------------------------------------------|--------|
+| length      | The length of the generated password                  | int    |
+| iterations  | The number of passwords to generate                   | int    |
+| characters  | The characters to use for password generation        | string |
+| clipboard   | Whether to copy the generated password to clipboard  | bool   |
 
-#### Examples
+Here is an example of a `.passgen` configuration file:
 
-Generate a password of length 16:
-
-```bash
-passgen --length 16
+```yaml
+generate:
+  length: 16
+  iterations: 1
+  characters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+  clipboard: true
 ```
 
-Generate 5 passwords of length 16 with special characters and hash them 5 times:
+## Milestones
 
-```bash
-passgen --length 16 --use-signs --hash-times 5 --num-passwords 5
-```
-
-Generate a password with custom characters and output in table format:
-
-```bash
-passgen --custom-chars "abcdef123$%" --output json
-```
+- [x] Generate passwords with specified length & characters
+- [ ] Fix merge config files (correct priority: flags > config file > default)
+- [ ] Remove the hash & salt from output and just print the password
 
 ## Contributing
 
