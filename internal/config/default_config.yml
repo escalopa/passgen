@@ -1,0 +1,10 @@
+# PassGen configuration file
+generator:
+  # Password length
+  length: 16
+  # Password hashing iterations count
+  iterations: 1
+  # Password characters
+  characters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+  # Copy password to clipboard
+  clipboard: false
